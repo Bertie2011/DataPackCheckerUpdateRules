@@ -1,0 +1,363 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Shared</name>
+    </assembly>
+    <members>
+        <member name="T:DataPackChecker.Shared.Data.AutoReferenceAttribute">
+            <summary>
+            A non-functional attribute indicating that the property will be filled by
+            <see cref="M:DataPackChecker.Shared.Data.DataPack.RebuildReferences"/>
+            </summary>
+        </member>
+        <member name="M:DataPackChecker.Shared.Data.DataPack.FindFunctions(System.String)">
+            <summary>
+            Find functions by namespaced identifier.
+            </summary>
+            <param name="identifier">A namespaced identifier, possibly prefixed by # to indicate a tag.<br>(#){namespace}:{path}/{name}</br></param>
+            <returns>All functions found by recursively parsing all tags.</returns>
+        </member>
+        <member name="M:DataPackChecker.Shared.Data.DataPack.RebuildReferences">
+            <summary>
+            Rebuilds references marked with <see cref="T:DataPackChecker.Shared.Data.AutoReferenceAttribute"/>.
+            </summary>
+        </member>
+        <member name="P:DataPackChecker.Shared.Data.Namespace.FolderPath">
+            <summary>
+            Relative to the datapack path. (data/{name})
+            </summary>
+        </member>
+        <member name="P:DataPackChecker.Shared.Data.Namespace.Key">
+            <summary>
+            Same as Name
+            </summary>
+        </member>
+        <member name="P:DataPackChecker.Shared.Data.Resources.Command.Line">
+            <summary>
+            The line number of this command. The first line has line number 1.
+            </summary>
+        </member>
+        <member name="P:DataPackChecker.Shared.Data.Resources.Command.Raw">
+            <summary>
+            The raw command string.
+            The string ends when a new command is started (e.g. after "run" in /execute) and everything else will be inside NextCommand.
+            </summary>
+        </member>
+        <member name="P:DataPackChecker.Shared.Data.Resources.Command.CommandKey">
+            <summary>
+            The first "word" of the command.
+            </summary>
+        </member>
+        <member name="P:DataPackChecker.Shared.Data.Resources.Command.Arguments">
+            <summary>
+            All space separated arguments of the command, excluding the CommandKey
+            </summary>
+        </member>
+        <member name="P:DataPackChecker.Shared.Data.Resources.Command.NextCommand">
+            <summary>
+            Some commands can have another command embedded (like /execute).
+            A second command embedded in this command will be placed in this variable.
+            Note that the next command might also have a next command of its own,
+            you might want to use the Flat property instead.
+            </summary>
+        </member>
+        <member name="P:DataPackChecker.Shared.Data.Resources.Command.Flat">
+            <summary>
+            Returns this command and all next commands (recursive).
+            </summary>
+        </member>
+        <member name="P:DataPackChecker.Shared.Data.Resources.Function.Commands">
+            <summary>
+            Returns all commands in this function. Each command might have a NextCommand (e.g. /execute) and
+            that command might have a NextCommand of its own. You might want to use CommandsFlat instead.
+            </summary>
+        </member>
+        <member name="P:DataPackChecker.Shared.Data.Resources.Function.CommandsFlat">
+            <summary>
+            Returns all commands, including NextCommands (recursive).
+            </summary>
+        </member>
+        <member name="P:DataPackChecker.Shared.Data.Resources.Function.References">
+            <summary>
+            All Functions referenced by commands in this function.
+            This includes any functions listed in referenced tags. If referenced tags contain more tags, each
+            (indirectly) referenced tag is searched for more functions.
+            </summary>
+        </member>
+        <member name="P:DataPackChecker.Shared.Data.Resources.Function.ReferencesFlat">
+            <summary>
+            All referenced functions (recursive), including this one.
+            This means that any function that is (indirectly) referenced through function commands
+            or tags will be listed here.
+            </summary>
+        </member>
+        <member name="P:DataPackChecker.Shared.Data.Resources.Resource.Identifier">
+            <summary>
+            Equal to "IdentifierPath/Name"
+            </summary>
+        </member>
+        <member name="P:DataPackChecker.Shared.Data.Resources.Resource.NamespacedIdentifier">
+            <summary>
+            The identifier used within Minecraft to target this resource.
+            Most often equal to "Namespace:Identifier"
+            </summary>
+        </member>
+        <member name="P:DataPackChecker.Shared.Data.Resources.Resource.FilePath">
+            <summary>
+            The file path relative to the namespace folder.
+            </summary>
+        </member>
+        <member name="P:DataPackChecker.Shared.Data.Resources.Resource.Key">
+            <summary>
+            Same as Identifier
+            </summary>
+        </member>
+        <member name="P:DataPackChecker.Shared.Data.Resources.Tags.FunctionTag.References">
+            <summary>
+            A list of all functions referenced by this tag.
+            This is recursive for any tags listed in other tags.
+            </summary>
+        </member>
+        <member name="P:DataPackChecker.Shared.Data.Resources.Tags.Tag.Entries">
+            <summary>
+            A convenient list of entries in the tag. The Content property can be parsed too, but because
+            an entry can also be an object it is not as straight forward.
+            </summary>
+        </member>
+        <member name="T:DataPackChecker.Shared.FileSystems.IFileSystem">
+            <summary>
+            PATH CONVENTIONS:
+            - Paths are relative to the BasePath
+            - Paths do not start with a slash.
+            - Path separators are equal to <see cref="F:System.IO.Path.DirectorySeparatorChar"/>
+            </summary>
+        </member>
+        <member name="M:DataPackChecker.Shared.Output.Error(DataPackChecker.Shared.Data.Namespace,System.String)">
+            <summary>
+            This method does not provide the creator with enough information, please use a more specific method.<br/><br/>
+            Output header format:<br/>
+            Namespace {ns.Name}
+            </summary>
+        </member>
+        <member name="M:DataPackChecker.Shared.Output.Error(DataPackChecker.Shared.Data.Resources.Resource,System.String)">
+            <summary>
+            Output header format:<br/>
+            {resource type} {r.Identifier}
+            </summary>
+        </member>
+        <member name="M:DataPackChecker.Shared.Output.Error(DataPackChecker.Shared.Data.Resources.Tags.Tag,System.String,System.String)">
+            <summary>
+            Output header format:<br/>
+            {resource type} {t.Identifier} - {item}
+            </summary>
+        </member>
+        <member name="M:DataPackChecker.Shared.Output.Error(DataPackChecker.Shared.Data.Resources.JsonResource,System.Text.Json.JsonElement,System.String)">
+            <summary>
+            Output header format:<br/>
+            {resource type} {r.Identifier} - {element}
+            </summary>
+        </member>
+        <member name="M:DataPackChecker.Shared.Output.Error(System.Exception)">
+            <summary>
+            This method does not provide the creator with enough information, please use a more specific method.
+            </summary>
+        </member>
+        <member name="M:DataPackChecker.Shared.Output.Error(System.String)">
+            <summary>
+            This method does not provide the creator with enough information, please use a more specific method.
+            </summary>
+        </member>
+        <member name="M:DataPackChecker.Shared.Output.Error(DataPackChecker.Shared.Data.Resources.Command,System.String)">
+            <summary>
+            Output header format:<br/>
+            Function {c.Function.Identifier} - Line {c.Line}: {c.Raw}...
+            </summary>
+        </member>
+        <member name="M:DataPackChecker.Shared.Output.InvalidConfiguration``1">
+            <summary>
+            Outputs an error indicating that the configuration is invalid.
+            </summary>
+            <typeparam name="T">The rule that is calling this method.</typeparam>
+        </member>
+        <member name="M:DataPackChecker.Shared.Output.GetResourceIdentifier(DataPackChecker.Shared.Data.Resources.Resource)">
+            <summary>
+            Returns: {r.GetTypeString()} {GetResourcePath(ns, r)}
+            </summary>
+        </member>
+        <member name="T:DataPackChecker.Shared.Util.JsonElementExtensions">
+            <summary>
+            <b>TryGet VS TryAs</b><br/>
+            The JsonElement TryGet... methods throw when the type does not match and only try to parse the data.
+            The TryAs... extension methods also take value type into account and return false (instead of throw) when the type does not match.
+            </summary>
+        </member>
+        <member name="M:DataPackChecker.Shared.Util.JsonElementExtensions.TryAsBool(System.Text.Json.JsonElement,System.Boolean@)">
+            <summary>
+            Returns true if this is a boolean. The out parameter contains the value.
+            <br/><br/><inheritdoc cref="T:DataPackChecker.Shared.Util.JsonElementExtensions"/>
+            </summary>
+        </member>
+        <member name="M:DataPackChecker.Shared.Util.JsonElementExtensions.TryAsString(System.Text.Json.JsonElement,System.String@)">
+            <summary>
+            Returns true if this is a string. The out parameter contains the value.
+            <br/><br/><inheritdoc cref="T:DataPackChecker.Shared.Util.JsonElementExtensions"/>
+            </summary>
+        </member>
+        <member name="M:DataPackChecker.Shared.Util.JsonElementExtensions.TryAsByte(System.Text.Json.JsonElement,System.Byte@)">
+            <summary>
+            Returns true if this is a byte. The out parameter contains the value.
+            <br/><br/><inheritdoc cref="T:DataPackChecker.Shared.Util.JsonElementExtensions"/>
+            </summary>
+        </member>
+        <member name="M:DataPackChecker.Shared.Util.JsonElementExtensions.TryAsBytesFromBase64(System.Text.Json.JsonElement,System.Byte[]@)">
+            <summary>
+            Returns true if this represents bytes from base64. The out parameter contains the value.
+            <br/><br/><inheritdoc cref="T:DataPackChecker.Shared.Util.JsonElementExtensions"/>
+            </summary>
+        </member>
+        <member name="M:DataPackChecker.Shared.Util.JsonElementExtensions.TryAsDateTime(System.Text.Json.JsonElement,System.DateTime@)">
+            <summary>
+            Returns true if this is a DateTime. The out parameter contains the value.
+            <br/><br/><inheritdoc cref="T:DataPackChecker.Shared.Util.JsonElementExtensions"/>
+            </summary>
+        </member>
+        <member name="M:DataPackChecker.Shared.Util.JsonElementExtensions.TryAsDateTimeOffset(System.Text.Json.JsonElement,System.DateTimeOffset@)">
+            <summary>
+            Returns true if this is a DateTimeOffset. The out parameter contains the value.
+            <br/><br/><inheritdoc cref="T:DataPackChecker.Shared.Util.JsonElementExtensions"/>
+            </summary>
+        </member>
+        <member name="M:DataPackChecker.Shared.Util.JsonElementExtensions.TryAsDecimal(System.Text.Json.JsonElement,System.Decimal@)">
+            <summary>
+            Returns true if this is a decimal. The out parameter contains the value.
+            <br/><br/><inheritdoc cref="T:DataPackChecker.Shared.Util.JsonElementExtensions"/>
+            </summary>
+        </member>
+        <member name="M:DataPackChecker.Shared.Util.JsonElementExtensions.TryAsDouble(System.Text.Json.JsonElement,System.Double@)">
+            <summary>
+            Returns true if this is a double. The out parameter contains the value.
+            <br/><br/><inheritdoc cref="T:DataPackChecker.Shared.Util.JsonElementExtensions"/>
+            </summary>
+        </member>
+        <member name="M:DataPackChecker.Shared.Util.JsonElementExtensions.TryAsGuid(System.Text.Json.JsonElement,System.Guid@)">
+            <summary>
+            Returns true if this is a Guid. The out parameter contains the value.
+            <br/><br/><inheritdoc cref="T:DataPackChecker.Shared.Util.JsonElementExtensions"/>
+            </summary>
+        </member>
+        <member name="M:DataPackChecker.Shared.Util.JsonElementExtensions.TryAsShort(System.Text.Json.JsonElement,System.Int16@)">
+            <summary>
+            Returns true if this is a short. The out parameter contains the value.
+            <br/><br/><inheritdoc cref="T:DataPackChecker.Shared.Util.JsonElementExtensions"/>
+            </summary>
+        </member>
+        <member name="M:DataPackChecker.Shared.Util.JsonElementExtensions.TryAsInt(System.Text.Json.JsonElement,System.Int32@)">
+            <summary>
+            Returns true if this is an int. The out parameter contains the value.
+            <br/><br/><inheritdoc cref="T:DataPackChecker.Shared.Util.JsonElementExtensions"/>
+            </summary>
+        </member>
+        <member name="M:DataPackChecker.Shared.Util.JsonElementExtensions.TryAsLong(System.Text.Json.JsonElement,System.Int64@)">
+            <summary>
+            Returns true if this is a long. The out parameter contains the value.
+            <br/><br/><inheritdoc cref="T:DataPackChecker.Shared.Util.JsonElementExtensions"/>
+            </summary>
+        </member>
+        <member name="M:DataPackChecker.Shared.Util.JsonElementExtensions.TryAsFloat(System.Text.Json.JsonElement,System.Single@)">
+            <summary>
+            Returns true if this is a float. The out parameter contains the value.
+            <br/><br/><inheritdoc cref="T:DataPackChecker.Shared.Util.JsonElementExtensions"/>
+            </summary>
+        </member>
+        <member name="M:DataPackChecker.Shared.Util.JsonElementExtensions.TryAsBool(System.Text.Json.JsonElement,System.String,System.Boolean@)">
+            <summary>
+            Returns true if the property is a boolean. The out parameter contains the value.
+            <br/><br/><inheritdoc cref="T:DataPackChecker.Shared.Util.JsonElementExtensions"/>
+            </summary>
+        </member>
+        <member name="M:DataPackChecker.Shared.Util.JsonElementExtensions.TryAsString(System.Text.Json.JsonElement,System.String,System.String@)">
+            <summary>
+            Returns true if the property is a string. The out parameter contains the value.
+            <br/><br/><inheritdoc cref="T:DataPackChecker.Shared.Util.JsonElementExtensions"/>
+            </summary>
+        </member>
+        <member name="M:DataPackChecker.Shared.Util.JsonElementExtensions.TryAsByte(System.Text.Json.JsonElement,System.String,System.Byte@)">
+            <summary>
+            Returns true if the property is a byte. The out parameter contains the value.
+            <br/><br/><inheritdoc cref="T:DataPackChecker.Shared.Util.JsonElementExtensions"/>
+            </summary>
+        </member>
+        <member name="M:DataPackChecker.Shared.Util.JsonElementExtensions.TryAsBytesFromBase64(System.Text.Json.JsonElement,System.String,System.Byte[]@)">
+            <summary>
+            Returns true if the property represents bytes from base64. The out parameter contains the value.
+            <br/><br/><inheritdoc cref="T:DataPackChecker.Shared.Util.JsonElementExtensions"/>
+            </summary>
+        </member>
+        <member name="M:DataPackChecker.Shared.Util.JsonElementExtensions.TryAsDateTime(System.Text.Json.JsonElement,System.String,System.DateTime@)">
+            <summary>
+            Returns true if the property is a DateTime. The out parameter contains the value.
+            <br/><br/><inheritdoc cref="T:DataPackChecker.Shared.Util.JsonElementExtensions"/>
+            </summary>
+        </member>
+        <member name="M:DataPackChecker.Shared.Util.JsonElementExtensions.TryAsDateTimeOffset(System.Text.Json.JsonElement,System.String,System.DateTimeOffset@)">
+            <summary>
+            Returns true if the property is a DateTimeOffset. The out parameter contains the value.
+            <br/><br/><inheritdoc cref="T:DataPackChecker.Shared.Util.JsonElementExtensions"/>
+            </summary>
+        </member>
+        <member name="M:DataPackChecker.Shared.Util.JsonElementExtensions.TryAsDecimal(System.Text.Json.JsonElement,System.String,System.Decimal@)">
+            <summary>
+            Returns true if the property is a decimal. The out parameter contains the value.
+            <br/><br/><inheritdoc cref="T:DataPackChecker.Shared.Util.JsonElementExtensions"/>
+            </summary>
+        </member>
+        <member name="M:DataPackChecker.Shared.Util.JsonElementExtensions.TryAsDouble(System.Text.Json.JsonElement,System.String,System.Double@)">
+            <summary>
+            Returns true if the property is a double. The out parameter contains the value.
+            <br/><br/><inheritdoc cref="T:DataPackChecker.Shared.Util.JsonElementExtensions"/>
+            </summary>
+        </member>
+        <member name="M:DataPackChecker.Shared.Util.JsonElementExtensions.TryAsGuid(System.Text.Json.JsonElement,System.String,System.Guid@)">
+            <summary>
+            Returns true if the property is a Guid. The out parameter contains the value.
+            <br/><br/><inheritdoc cref="T:DataPackChecker.Shared.Util.JsonElementExtensions"/>
+            </summary>
+        </member>
+        <member name="M:DataPackChecker.Shared.Util.JsonElementExtensions.TryAsShort(System.Text.Json.JsonElement,System.String,System.Int16@)">
+            <summary>
+            Returns true if the property is a short. The out parameter contains the value.
+            <br/><br/><inheritdoc cref="T:DataPackChecker.Shared.Util.JsonElementExtensions"/>
+            </summary>
+        </member>
+        <member name="M:DataPackChecker.Shared.Util.JsonElementExtensions.TryAsInt(System.Text.Json.JsonElement,System.String,System.Int32@)">
+            <summary>
+            Returns true if the property is an int. The out parameter contains the value.
+            <br/><br/><inheritdoc cref="T:DataPackChecker.Shared.Util.JsonElementExtensions"/>
+            </summary>
+        </member>
+        <member name="M:DataPackChecker.Shared.Util.JsonElementExtensions.TryAsLong(System.Text.Json.JsonElement,System.String,System.Int64@)">
+            <summary>
+            Returns true if the property is a long. The out parameter contains the value.
+            <br/><br/><inheritdoc cref="T:DataPackChecker.Shared.Util.JsonElementExtensions"/>
+            </summary>
+        </member>
+        <member name="M:DataPackChecker.Shared.Util.JsonElementExtensions.TryAsFloat(System.Text.Json.JsonElement,System.String,System.Single@)">
+            <summary>
+            Returns true if the property is a float. The out parameter contains the value.
+            <br/><br/><inheritdoc cref="T:DataPackChecker.Shared.Util.JsonElementExtensions"/>
+            </summary>
+        </member>
+        <member name="M:DataPackChecker.Shared.Util.JsonElementExtensions.TryAsArray(System.Text.Json.JsonElement,System.String,System.Text.Json.JsonElement@)">
+            <summary>
+            Returns true if the property is an array. The out parameter contains the value.
+            <br/><br/><inheritdoc cref="T:DataPackChecker.Shared.Util.JsonElementExtensions"/>
+            </summary>
+        </member>
+        <member name="M:DataPackChecker.Shared.Util.JsonElementExtensions.TryAsObject(System.Text.Json.JsonElement,System.String,System.Text.Json.JsonElement@)">
+            <summary>
+            Returns true if the property is an object. The out parameter contains the value.
+            <br/><br/><inheritdoc cref="T:DataPackChecker.Shared.Util.JsonElementExtensions"/>
+            </summary>
+        </member>
+    </members>
+</doc>
