@@ -22,10 +22,21 @@ namespace Core.Update {
         private static readonly Regex aecRegex = new Regex(@"^summon (minecraft:)?area_effect_cloud.*$", RegexOptions.ExplicitCapture | RegexOptions.Compiled);
         private static readonly Regex emptyAECRegex = new Regex(@"^summon (minecraft:)?area_effect_cloud \S+ \S+ \S+ (?!.*?(Effects|Potion|Particle)\s*?:).*$", RegexOptions.ExplicitCapture | RegexOptions.Compiled);
 
+        // Rename regexes.
+        private static readonly Regex BlockCondition = new Regex(@"""block""\s*?:\s*?""", RegexOptions.Compiled);
+        private static readonly Regex ItemCondition = new Regex(@"""item""\s*?:\s*?""", RegexOptions.Compiled);
+
         public override void Run(DataPack pack, JsonElement? config, Output output) {
             CheckFormat(pack, output);
             CheckFunctions(pack, output);
             CheckDimensionTypes(pack, output);
+            CheckAdvancements(pack, output);
+            CheckPredicates(pack, output);
+            CheckLootTables(pack, output);
+            CheckRecipes(pack, output);
+            CheckItemModifiers(pack, output);
+            CheckTags(pack, output);
+            CheckWorldGen(pack, output);
         }
 
         private void CheckFormat(DataPack pack, Output output) {
@@ -56,6 +67,7 @@ namespace Core.Update {
                         if (c.Raw.StartsWith("scoreboard objectives add") && c.Raw.Contains("minecraft.custom:minecraft.play_one_minute")) {
                             output.Error(c, "The minecraft.custom:minecraft.play_one_minute objective has been replaced by minecraft.custom:minecraft.play_time.");
                         }
+                        CheckBlockReplacement(c.Raw, m => output.Error(c, m));
                     }
                 }
             }
@@ -67,6 +79,8 @@ namespace Core.Update {
                     CheckDimensionType(dimType, dimType.Content, output);
                 }
                 foreach (var dim in ns.DimensionData.Dimensions) {
+                    var content = dim.Content.ToString();
+                    CheckBlockReplacement(content, m => output.Error(dim, m));
                     if (!dim.Content.TryAsObject("type", out var dimType)) continue;
                     CheckDimensionType(dim, dimType, output);
                 }
@@ -79,6 +93,97 @@ namespace Core.Update {
             }
             if (!element.TryAsInt("height", out _)) {
                 output.Error(resource, element, "New required property 'height' is missing here.");
+            }
+        }
+
+        private void CheckAdvancements(DataPack pack, Output output) {
+            foreach (var ns in pack.Namespaces) {
+                foreach (var advancement in ns.Advancements) {
+                    var content = advancement.Content.ToString();
+                    CheckConditionReplacement(advancement, content, output);
+                    CheckBlockReplacement(content, m => output.Error(advancement, m));
+                }
+            }
+        }
+
+        private void CheckPredicates(DataPack pack, Output output) {
+            foreach (var ns in pack.Namespaces) {
+                foreach (var predicate in ns.Predicates) {
+                    var content = predicate.Content.ToString();
+                    CheckConditionReplacement(predicate, content, output);
+                    CheckBlockReplacement(content, m => output.Error(predicate, m));
+                }
+            }
+        }
+
+        private void CheckLootTables(DataPack pack, Output output) {
+            foreach (var ns in pack.Namespaces) {
+                foreach (var lootTable in ns.LootTables) {
+                    var content = lootTable.Content.ToString();
+                    CheckConditionReplacement(lootTable, content, output);
+                    CheckBlockReplacement(content, m => output.Error(lootTable, m));
+                }
+            }
+        }
+
+        private void CheckRecipes(DataPack pack, Output output) {
+            foreach (var ns in pack.Namespaces) {
+                foreach (var recipe in ns.Recipes) {
+                    var content = recipe.Content.ToString();
+                    CheckBlockReplacement(content, m => output.Error(recipe, m));
+                }
+            }
+        }
+
+        private void CheckTags(DataPack pack, Output output) {
+            foreach (var ns in pack.Namespaces) {
+                foreach (var blockTag in ns.TagData.BlockTags) {
+                    blockTag.Entries.ForEach(e => CheckBlockReplacement(e.Identifier, m => output.Error(blockTag, e.Identifier, m)));
+                }
+                foreach (var itemTag in ns.TagData.ItemTags) {
+                    itemTag.Entries.ForEach(e => CheckBlockReplacement(e.Identifier, m => output.Error(itemTag, e.Identifier, m)));
+                }
+            }
+        }
+
+        private void CheckItemModifiers(DataPack pack, Output output) {
+            foreach (var ns in pack.Namespaces) {
+                foreach (var itemModifier in ns.ItemModifiers) {
+                    var content = itemModifier.Content.ToString();
+                    CheckBlockReplacement(content, m => output.Error(itemModifier, m));
+                }
+            }
+        }
+
+        private void CheckWorldGen(DataPack pack, Output output) {
+            foreach (var ns in pack.Namespaces) {
+                foreach (var configuredFeature in ns.WorldGenData.ConfiguredFeatures) {
+                    var content = configuredFeature.Content.ToString();
+                    CheckBlockReplacement(content, m => output.Error(configuredFeature, m));
+                }
+                foreach (var configuredSurfaceBuilder in ns.WorldGenData.ConfiguredSurfaceBuilders) {
+                    var content = configuredSurfaceBuilder.Content.ToString();
+                    CheckBlockReplacement(content, m => output.Error(configuredSurfaceBuilder, m));
+                }
+                foreach (var processor in ns.WorldGenData.ProcessorLists) {
+                    var content = processor.Content.ToString();
+                    CheckBlockReplacement(content, m => output.Error(processor, m));
+                }
+            }
+        }
+
+        private void CheckConditionReplacement(JsonResource resource, string rawText, Output output) {
+            if (BlockCondition.IsMatch(rawText)) {
+                output.Error(resource, "This item contains a string 'block' key, which might indicate a condition that checks a block. If so, replace the 'block' string field by a 'blocks' string list of block ids.");
+            }
+            if (ItemCondition.IsMatch(rawText)) {
+                output.Error(resource, "This item contains a string 'item' key, which might indicate a condition that checks an item. If so, replace the 'item' string field by an 'items' string list of item ids.");
+            }
+        }
+
+        private void CheckBlockReplacement(string rawText, Action<string> onError) {
+            if (rawText.Contains("grass_path")) {
+                onError("Contains 'grass_path', which might refer to the block/item id. If so, replace with 'dirt_path'.");
             }
         }
     }
